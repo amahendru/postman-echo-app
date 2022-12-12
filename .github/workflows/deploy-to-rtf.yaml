@@ -14,8 +14,7 @@ on:
 
 env:
   org_id: f724cfb6-c219-4edb-9767-8f48012b5cd9
-  connected_app_id: 3266867cc7f04170a19812384726f6a2
-  connected_app_secret: B3d0CCfC548b438f89AC08C3958980C3
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -67,8 +66,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
           AWS_DEFAULT_REGION: us-east-1
-      - run: echo "$CLIENT_ID"
-      - run: echo "$CLIENT_SECRET"
       
       - name: Publish to Exchange
         run: mvn clean deploy
@@ -78,11 +75,10 @@ jobs:
           mvn mule:deploy
           -Dmule.artifact="/path"
           -Dmule.env=dev
-          -Dapi.instance.id=18321631
           -Danypoint.connected.app.id=${{ secrets.ANYPOINT_CONNECTED_APP_ID }}
           -Danypoint.connected.app.secret=${{ secrets.ANYPOINT_CONNECTED_APP_SECRET }}
           -Danypoint.client.id=${{ secrets.ANYPOINT_CLIENT_ID }}
           -Danypoint.client.secret=${{ secrets.ANYPOINT_CLIENT_SECRET }}
-          -Dapp.client_id=$CLIENT_ID
-          -Dapp.client_secret=$CLIENT_SECRET
+          -Dclient.app.id=$CLIENT_ID
+          -Dclient.app.secret=$CLIENT_SECRET
           -Ddeploy.rtf_platform_name=test-rtf-eks-cluster

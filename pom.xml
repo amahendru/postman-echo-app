@@ -63,6 +63,8 @@
 							<anypoint.platform.analytics_base_uri>${anypoint.analytics_base_uri}</anypoint.platform.analytics_base_uri>
 							<anypoint.platform.client_id>${anypoint.client.id}</anypoint.platform.client_id>
 							<anypoint.platform.client_secret>${anypoint.client.secret}</anypoint.platform.client_secret>
+							<client.app.id>${client.app.id}</client.app.id>
+							<client.app.secret>${client.app.secret}</client.app.secret>
 						</properties>
 						<deploymentSettings>
 							<enforceDeployingReplicasAcrossNodes>false</enforceDeployingReplicasAcrossNodes>
