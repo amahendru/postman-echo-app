@@ -50,7 +50,7 @@ jobs:
             }]
       - name: Get Client ID from AWS Secrets Manager
         run: | 
-          CLIENT_ID=$( aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:us-east-1:077469971775:secret:amah/apis/client-app-1-ZPTB1I  --query SecretString --output text | jq '.client_id')
+          CLIENT_ID=$( aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:us-east-1:077469971775:secret:amah/apis/client-app-1-ZPTB1I  --query SecretString --output text | jq --raw-output '.client_id')
           echo "CLIENT_ID=$CLIENT_ID" >> "$GITHUB_ENV"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -59,7 +59,7 @@ jobs:
           AWS_DEFAULT_REGION: us-east-1
       - name: Get Client Secret from AWS Secrets Manager
         run: | 
-          CLIENT_SECRET=$( aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:us-east-1:077469971775:secret:amah/apis/client-app-1-ZPTB1I  --query SecretString --output text | jq '.client_secret')
+          CLIENT_SECRET=$( aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:us-east-1:077469971775:secret:amah/apis/client-app-1-ZPTB1I  --query SecretString --output text | jq --raw-output '.client_secret')
           echo "CLIENT_SECRET=$CLIENT_SECRET" >> "$GITHUB_ENV"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
