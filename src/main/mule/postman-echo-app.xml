@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="416e2998-75b4-49ed-8239-2da079827137" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="a693c547-0bd9-4d98-9045-20250a90402c" >
+		<http:request-connection host="postman-echo-proxy.us-e2.cloudhub.io" port="80" />
+	</http:request-config>
+	<flow name="postman-echo-appFlow" doc:id="7dd74473-697e-414d-bffb-5d5b7dab7a70" >
+		<http:listener doc:name="Listener" doc:id="bf3b41cf-65b8-44c3-b923-304dd6ea6e7d" config-ref="HTTP_Listener_config" path="/test/echo"/>
+		<http:request method="GET" doc:name="Request" doc:id="19e2326f-92a6-44d6-ae0e-835436246296" config-ref="HTTP_Request_configuration" path="/get?testParam=test">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	client_secret : Mule::p('client.app.secret'),
+	client_id : Mule::p('client.app.id')
+}]]]></http:headers>
+		</http:request>
+	</flow>
+</mule>

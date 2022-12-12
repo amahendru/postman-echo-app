@@ -1,0 +1,88 @@
+# This is a basic workflow to help you get started with Actions
+name: Deploy to RTF
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  #push:
+  #  branches: [ "main" ]
+  #pull_request:
+  #  branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  org_id: f724cfb6-c219-4edb-9767-8f48012b5cd9
+  connected_app_id: 3266867cc7f04170a19812384726f6a2
+  connected_app_secret: B3d0CCfC548b438f89AC08C3958980C3
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build_deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Checking out repository on runner 
+        uses: actions/checkout@v2
+      
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3.3.0
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+      
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.3
+        with:
+          maven-version: 3.8.2
+
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@v1.4.0
+        with:
+          java-version: 11
+          settings-servers: |
+            [{
+                "id": "anypoint-exchange-v3",
+                "username": "~~~Client~~~",
+                "password": "${{ secrets.ANYPOINT_CONNECTED_APP_ID }}~?~${{ secrets.ANYPOINT_CONNECTED_APP_SECRET }}"
+            }]
+      - name: Get Client ID from AWS Secrets Manager
+        run: | 
+          CLIENT_ID=$( aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:us-east-1:077469971775:secret:amah/apis/client-app-1-ZPTB1I  --query SecretString --output text | jq '.client_id')
+          echo "CLIENT_ID=$CLIENT_ID" >> "$GITHUB_ENV"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          AWS_DEFAULT_REGION: us-east-1
+      - name: Get Client Secret from AWS Secrets Manager
+        run: | 
+          CLIENT_SECRET=$( aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:us-east-1:077469971775:secret:amah/apis/client-app-1-ZPTB1I  --query SecretString --output text | jq '.client_secret')
+          echo "CLIENT_SECRET=$CLIENT_SECRET" >> "$GITHUB_ENV"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          AWS_DEFAULT_REGION: us-east-1
+      - run: echo "$CLIENT_ID"
+      - run: echo "$CLIENT_SECRET"
+      
+      - name: Publish to Exchange
+        run: mvn clean deploy
+      
+      - name: Deploy to RTF
+        run: >
+          mvn mule:deploy
+          -Dmule.artifact="/path"
+          -Dmule.env=dev
+          -Dapi.instance.id=18321631
+          -Danypoint.connected.app.id=${{ secrets.ANYPOINT_CONNECTED_APP_ID }}
+          -Danypoint.connected.app.secret=${{ secrets.ANYPOINT_CONNECTED_APP_SECRET }}
+          -Danypoint.client.id=${{ secrets.ANYPOINT_CLIENT_ID }}
+          -Danypoint.client.secret=${{ secrets.ANYPOINT_CLIENT_SECRET }}
+          -Dapp.client_id=$CLIENT_ID
+          -Dapp.client_secret=$CLIENT_SECRET
+          -Ddeploy.rtf_platform_name=test-rtf-eks-cluster
